@@ -1,19 +1,21 @@
 const express = require('express')
 const cors = require('cors')
 const mongoose = require('mongoose')
-const uniqueValidator = require('mongoose-unique-validator')
+//const uniqueValidator = require('mongoose-unique-validator')
+const uniqueValidator = require('mongoose-unique-validator').default
+const bcrypt = require('bcrypt')
 const app = express()
 app.use(express.json())
 app.use(cors())
 
 const Filme = mongoose.model("Filme", mongoose.Schema({
-    titulo: {type: String},
-    sinopse: {type: String}
+    titulo: { type: String },
+    sinopse: { type: String }
 }))
 
 const usuarioSchema = mongoose.Schema({
-    login: {type: String, required: true, unique: true},
-    password: {type: String, required: true}
+    login: { type: String, required: true, unique: true },
+    password: { type: String, required: true }
 })
 usuarioSchema.plugin(uniqueValidator)
 const Usuario = mongoose.model("Usuario", usuarioSchema)
@@ -43,7 +45,7 @@ app.post('/filmes', async (req, res) => {
     const titulo = req.body.titulo
     const sinopse = req.body.sinopse
     //montar o objeto json
-    const filme = new Filme ({titulo: titulo, sinopse: sinopse})
+    const filme = new Filme({ titulo: titulo, sinopse: sinopse })
     //acrescenta o filme novo ao banco
     await filme.save()
     //buscar no banco a base atualizada
@@ -53,27 +55,34 @@ app.post('/filmes', async (req, res) => {
 })
 
 app.post('/signup', async (req, res) => {
-    const login = req.body.login
-    const password = req.body.password
-    const usuario = new Usuario({
-        login: login,
-        password: password
-    })
-    const respostaMongo = await usuario.save()
-    console.log(respostaMongo)
-    res.end()
+    try {
+        const login = req.body.login
+        const password = req.body.password
+        const passCriptografado = await bcrypt.hash(password, 10)
+        const usuario = new Usuario({
+            login: login,
+            password: passCriptografado
+        })
+        const respostaMongo = await usuario.save()
+        console.log(respostaMongo)
+        res.status(201).end()
+    }
+    catch (e) {
+        console.log(e)
+        res.status(409).end()
+    }
 })
 
-async function conectarAoMongo () {
+async function conectarAoMongo() {
     await mongoose.connect(`mongodb+srv://andreiamachion_db_user:mongo123@cluster0.d7majmq.mongodb.net/`)
 }
 
-app.listen(3000, () => {
+app.listen(3000, async () => {
     try {
-        conectarAoMongo()
-        console.log ("server up & running & Mongo connected")
+        await conectarAoMongo()
+        console.log("server up & running & Mongo connected")
     }
     catch (e) {
-        console.log ("erro: ", e)
+        console.log("erro: ", e.reason?.servers ?? e)
     }
 })
