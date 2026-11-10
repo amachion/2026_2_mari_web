@@ -41,32 +41,79 @@ async function cadastrarFilme() {
         }
     }
     else {
-        let alert = document.querySelector('.alert-cadastro-filme')
-        alert.classList.add('show')
-        alert.classList.remove('d-none')
-        setTimeout(() => {
-            alert.classList.add('d-none')
-            alert.classList.remove('show')
-        }, 2000)
+        exibirAlerta ('.alert-cadastro-filme', 'Preencha todos os campos', ['show', 'alert-danger'], ['d-none'], 2000)
     }
 }
 
 async function cadastrarUsuario () {
-    const cadastroUsuarioEndpoint = '/signup'
     let usuarioCadastroInput = document.querySelector('#usuarioCadastroInput')
     let passwordCadastroInput = document.querySelector('#passwordCadastroInput')
     let usuarioCadastro = usuarioCadastroInput.value
     let passwordCadastro = passwordCadastroInput.value
     if (usuarioCadastro && passwordCadastro) {
-
+        try {
+            const cadastroUsuarioEndpoint = '/signup'
+            const URLCompleta = `${protocolo}${baseURL}${cadastroUsuarioEndpoint}`
+            await axios.post (URLCompleta, 
+                             {login: usuarioCadastro, password: passwordCadastro})
+            usuarioCadastroInput.value = ""
+            passwordCadastroInput.value = ""
+            exibirAlerta ('.alert-modal-cadastro', "Usuário cadastrado com sucesso!", ['alert-success', 'show'], ['alert-danger', 'd-none'], 2000)
+            esconderModal('#modalCadastro', 2000)
+        }
+        catch (e) {
+            exibirAlerta ('.alert-modal-cadastro', "Usuário já cadastrado", ['show', 'alert-danger'], ['d-none', 'alert-success'], 2000)
+            esconderModal ('#modalCadastro', 2000)
+        }
     }
     else {
-        let alert = document.querySelector('.alert-modal-cadastro')
-        alert.classList.add('show')
-        alert.classList.remove('d-none')
-        setTimeout(() => {
-            alert.classList.add('d-none')
-            alert.classList.remove('show')
-        }, 2000)
+        exibirAlerta ('.alert-modal-cadastro', "Preencha todos os campos", ['show', 'alert-danger'], ['d-none', 'alert-success'], 2000)
     }
+}
+
+const fazerLogin = async () => {
+    let usuarioLoginInput = document.querySelector('#usuarioLoginInput')
+    let passwordLoginInput = document.querySelector('#passwordLoginInput')
+    let usuarioLogin = usuarioLoginInput.value
+    let passwordLogin = passwordLoginInput.value
+    if (usuarioLogin && passwordLogin) {
+        try {
+            const loginEndpoint = '/login'
+            const URLCompleta = `${protocolo}${baseURL}${loginEndpoint}`
+            const resposta = await axios.post (URLCompleta,
+                {login: usuarioLogin, password: passwordLogin})
+            console.log (resposta.data)
+            usuarioLoginInput.value = ""
+            passwordLoginInput.value = ""
+            exibirAlerta ('.alert-modal-login', "Login realizado com sucesso!", ['show', 'alert-success'], ['d-none', 'alert-danger'], 2000)
+            esconderModal('#modalLogin', 2000)
+            let cadastrarFilmeButton = document.querySelector('#cadastrarFilmeButton')
+            cadastrarFilmeButton.disabled = false
+            let loginLink = document.querySelector('#loginLink')
+            loginLink.innerHTML = "Logout"
+        }
+        catch (e) {
+            exibirAlerta ('.alert-modal-login', "Problema no login", ['show', 'alert-danger'], ['d-none', 'alert-success'], 2000)
+        }
+    }
+    else {
+        exibirAlerta('.alert-modal-login', "Preencha todos os campos", ['show', 'alert-danger'], ['d-none', 'alert-success'], 2000)
+    }
+}
+
+function exibirAlerta (seletor, innerHTML, classesToAdd, classesToRemove, timeout) {
+    let alert = document.querySelector(seletor)
+    alert.innerHTML = innerHTML
+    alert.classList.add(...classesToAdd)
+    alert.classList.remove(...classesToRemove)
+    setTimeout(() => {
+        alert.classList.remove('show')
+        alert.classList.add('d-none')
+    }, timeout)
+}
+function esconderModal (seletor, timeout) {
+     setTimeout (() => {
+        let modal = bootstrap.Modal.getInstance(seletor)
+        modal.hide()
+    }, timeout)
 }

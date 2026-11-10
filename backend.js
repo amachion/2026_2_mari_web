@@ -91,7 +91,7 @@ app.post('/login', async (req, res) => {
         "chave-secreta",
         {expiresIn: "1h"}
     )
-    res.status(200).json({token: token})
+    return res.status(200).json({token: token})
 })
 
 async function conectarAoMongo() {
