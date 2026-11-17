@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="css/styles.css">
 </head>
 
-<body onload="obterFilmes()">
+<body onload="prepararPagina(); obterFilmes()">
 
     <div class="modal fade" id="modalCadastro" aria-labelledby="modalCadastro" aria-hidden="true">
         <div class="modal-dialog">
@@ -97,13 +97,11 @@
                     </button>
                     <div class="collapse navbar-collapse" id="myNav">
                         <div class="navbar-nav ms-auto">
-                            <a href="#" class="nav-link active me-2"
+                            <a id="novoUsuarioLink" href="#" class="nav-link active me-2"
                                 data-bs-target="#modalCadastro"
                                 data-bs-toggle="modal">Novo usuário</a>
                             
-                            <a id="loginLink" href="#" class="nav-link active me-2"
-                                data-bs-target="#modalLogin"
-                                data-bs-toggle="modal">Login</a>
+                            <a id="loginLink" href="#" class="nav-link active me-2" onclick="tratarLoginLogout()"           >Login</a>
                         </div>
                     </div>
                 </nav>
